@@ -9,6 +9,7 @@ import {useTheme, ThemeProvider, createTheme, css} from '@mui/material/styles';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import './App.css';
+import ContentBoard from "./components/ContentBoard.jsx";
 
 const ColorModeContext = React.createContext({ toggleColorMode: () => {} });
 const storedTheme = localStorage.getItem('colorMode');
@@ -31,31 +32,24 @@ function App() {
           <AppBar position="static">
               <Toolbar variant="dense" sx={{display:'flex', justifyContent:'space-between', }}>
                   <Typography variant="h6" color="inherit">
-                      Terrlo
+                      TaskMaster
                   </Typography>
                   <IconButton sx={{float:'right', ml: 1 }} onClick={colorMode.toggleColorMode} color="inherit">
                       {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
                   </IconButton>
               </Toolbar>
           </AppBar>
-          <Container sx={{
-              height: '100%',
-              boxSizing: 'border-box'
-          }} maxWidth="lg">
-              {/* Your main content goes here */}
-              <Box my={4}>
-                  <p>This is the main content area of your app.</p>
-              </Box>
-          </Container>
+          <ContentBoard/>
           <Box sx={{
               display: 'flex',
               justifyContent: 'center',
               bottom: 0,
               position: 'fixed',
               width: '100%',
+              paddingBottom:'10px'
           }}>
               <Typography variant="body2" color="text.secondary" align="center">
-                  © 2024 My App
+                  © 2024 TaskMaster
               </Typography>
           </Box>
       </Box>
