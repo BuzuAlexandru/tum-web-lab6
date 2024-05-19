@@ -44,7 +44,7 @@ function App() {
               display: 'flex',
               justifyContent: 'center',
               bottom: 0,
-              position: 'fixed',
+              position: 'static',
               width: '100%',
               paddingBottom:'10px'
           }}>

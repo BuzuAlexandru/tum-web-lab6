@@ -5,10 +5,14 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import ToggleColorMode from "./App.jsx";
+import {Provider} from "react-redux";
+import {store} from "./redux-toolkit/store/store.js";
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ToggleColorMode />
+      <Provider store={store}>
+          <ToggleColorMode />
+      </Provider>
   </React.StrictMode>,
 )
