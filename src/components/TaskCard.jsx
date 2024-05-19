@@ -1,5 +1,5 @@
 import React from 'react';
-import {Card, CardHeader, CardContent, CardActions, Checkbox, Button} from "@mui/material";
+import {Card, CardHeader, CardContent, CardActions, Checkbox, Button, Menu, MenuItem, Fade} from "@mui/material";
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from "@mui/icons-material/Star";
 import List from '@mui/material/List';
@@ -11,12 +11,14 @@ import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CommentIcon from '@mui/icons-material/Comment';
 import {Add, AddBox, Delete, TaskAlt} from "@mui/icons-material";
+import {useDispatch} from "react-redux";
+import {removeTaskCard} from "../redux-toolkit/slices/taskSlice.js";
 
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function TaskCard() {
-    const [checked, setChecked] = React.useState([0]);
+export default function TaskCard(props) {
+    const [checked, setChecked] = React.useState([]);
 
     const handleToggle = (value) => () => {
         const currentIndex = checked.indexOf(value);
@@ -31,27 +33,63 @@ export default function TaskCard() {
         setChecked(newChecked);
     };
 
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+    const dispatch = useDispatch()
+    const deleteCard=()=>{
+        dispatch(removeTaskCard(props.task.id))
+    }
+
     return (
+        <div style={{paddingBottom: '20px'}}>
         <Card sx={{
-            width:'fit-content'
+            width:'fit-content',
+            height:'fit-content',
         }}>
             <CardHeader
                 sx={{
                     paddingBottom:'5px'
                 }}
                 avatar={<TaskAlt/>}
-                title={'Lab 6 PW'}
-                action={<IconButton aria-label="settings">
+                title={props.task.title}
+                action={<><IconButton
+                            aria-label="settings"
+                            id="fade-button"
+                            aria-controls={open ? 'fade-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleClick}
+                        >
                             <MoreVertIcon />
-                        </IconButton>}/>
-            <CardContent sx={{padding: '10px', paddingBottom:'5px'}}>
-                <List sx={{ width: '100%', minWidth: 300, maxWidth: 500, bgcolor: 'background.paper' }}>
-                    {[0, 1, 2, 3].map((value) => {
-                        const labelId = `checkbox-list-label-${value}`;
+                        </IconButton>
+                    <Menu
+                        id="fade-menu"
+                        MenuListProps={{
+                            'aria-labelledby': 'fade-button',
+                }}
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleClose}
+                        TransitionComponent={Fade}
+                    >
+                        <MenuItem sx={{color:'red'}} onClick={deleteCard}>Delete</MenuItem>
+                    </Menu></>
+            }/>
 
+            <CardContent sx={{padding: '10px', paddingBottom:'5px', height:'fir-content', minHeight:'150px',}}>
+                {props.task.tasks.length != 0 ? (
+                <List sx={{ width: '100%', minWidth: 300, maxWidth: 400, bgcolor: 'background.paper' }}>
+                    {props.task.tasks.map((value) => {
+                        const labelId = `checkbox-list-label-${value.id}`;
                         return (
                             <ListItem
-                                key={value}
+                                key={`task${value.id}`}
                                 secondaryAction={
                                     <IconButton edge="end" aria-label="comments">
                                         <Delete />
@@ -59,22 +97,23 @@ export default function TaskCard() {
                                 }
                                 disablePadding
                             >
-                                <ListItemButton role={undefined} onClick={handleToggle(value)} dense>
-                                    <ListItemIcon>
+                                <ListItemButton role={undefined} dense disableRipple>
+                                    <ListItemIcon sx={{minWidth:'30px'}}>
                                         <Checkbox
                                             edge="start"
-                                            checked={checked.indexOf(value) !== -1}
+                                            checked={checked.indexOf(value.id) !== -1}
+                                            onChange={handleToggle(value.id)}
                                             tabIndex={-1}
                                             disableRipple
                                             inputProps={{ 'aria-labelledby': labelId }}
                                         />
                                     </ListItemIcon>
-                                    <ListItemText id={labelId} primary={`Line item ${value + 1}`} />
+                                    <ListItemText id={labelId} primary={value.description} />
                                 </ListItemButton>
                             </ListItem>
                         );
                     })}
-                </List>
+                </List>):(<div></div>)}
                 <Button
                     sx={{
                         width:'100%'
@@ -95,6 +134,6 @@ export default function TaskCard() {
 
                 />
             </CardActions>
-        </Card>
+        </Card></div>
     );
 }
