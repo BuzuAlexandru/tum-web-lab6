@@ -61,12 +61,26 @@ const taskSlice = createSlice({
             for (let i = 0; i < state.length; i++) {
                 if (state[i].id === action.payload) {
                     cardIndex = i
+                    break
                 }
             }
             state.splice(cardIndex,1)
         },
+        updateTaskData(state, action) {
+            for (let i = 0; i < state.length; i++) {
+                if (state[i].id === action.payload.id) {
+                    state.splice(i,1, action.payload)
+                    break
+                }
+            }
+        }
     },
 })
 
-export const {addTaskData, removeTaskCard } = taskSlice.actions
+export const {
+    addTaskData,
+    removeTaskCard,
+    updateTaskData
+} = taskSlice.actions
+
 export default taskSlice.reducer
