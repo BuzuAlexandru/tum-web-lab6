@@ -12,12 +12,12 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CommentIcon from '@mui/icons-material/Comment';
 import {Add, AddBox, Delete, TaskAlt} from "@mui/icons-material";
 import {useDispatch} from "react-redux";
-import {removeTaskCard} from "../redux-toolkit/slices/taskSlice.js";
+import {removeTaskCard, updateTaskData} from "../redux-toolkit/slices/taskSlice.js";
 
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function TaskCard(props) {
+export default function TaskCard({task}) {
     const [checked, setChecked] = React.useState([]);
 
     const handleToggle = (value) => () => {
@@ -43,7 +43,13 @@ export default function TaskCard(props) {
     };
     const dispatch = useDispatch()
     const deleteCard=()=>{
-        dispatch(removeTaskCard(props.task.id))
+        dispatch(removeTaskCard(task.id))
+    }
+
+    const handleFavorite = () => {
+        let newTask = {...task}
+        newTask.favourite = !newTask.favourite
+        dispatch(updateTaskData(newTask))
     }
 
     return (
@@ -57,7 +63,7 @@ export default function TaskCard(props) {
                     paddingBottom:'5px'
                 }}
                 avatar={<TaskAlt/>}
-                title={props.task.title}
+                title={task.title}
                 action={<><IconButton
                             aria-label="settings"
                             id="fade-button"
@@ -83,9 +89,9 @@ export default function TaskCard(props) {
             }/>
 
             <CardContent sx={{padding: '10px', paddingBottom:'5px', height:'fir-content', minHeight:'150px',}}>
-                {props.task.tasks.length != 0 ? (
+                {task.tasks.length != 0 ? (
                 <List sx={{ width: '100%', minWidth: 300, maxWidth: 400, bgcolor: 'background.paper' }}>
-                    {props.task.tasks.map((value) => {
+                    {task.tasks.map((value) => {
                         const labelId = `checkbox-list-label-${value.id}`;
                         return (
                             <ListItem
@@ -131,6 +137,7 @@ export default function TaskCard(props) {
                     {...label}
                     icon={<StarBorderIcon />}
                     checkedIcon={<StarIcon sx={{color: '#ffc107'}} />}
+                    onChange={handleFavorite}
 
                 />
             </CardActions>

@@ -90,7 +90,7 @@ export default function ContentBoard(props) {
             flexWrap: 'wrap'
         }} maxWidth="lg">
             {taskCardData && taskCardData.length > 0 ? (
-                taskCardData.map((task) => (
+                [...taskCardData].sort(function(a,b){return b.favourite-a.favourite}).map((task) => (
                     <TaskCard key={task.id} task={task} />
                 ))):(<></>)}
             <Box sx={{
