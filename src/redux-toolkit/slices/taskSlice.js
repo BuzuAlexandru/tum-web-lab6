@@ -5,7 +5,6 @@ const initialState = [
         id: 0,
         title: 'PW Lab 6',
         favourite: false,
-        archived: false,
         tasks: [
             {
                 id: 0,
@@ -28,7 +27,6 @@ const initialState = [
         id: 1,
         title: 'PW Lab 7',
         favourite: false,
-        archived: false,
         tasks: [
             {
                 id: 3,
