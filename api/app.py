@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_swagger_ui import get_swaggerui_blueprint
 from db import db
+from init_db import init_db
 
 
 def create_app():
@@ -26,6 +27,7 @@ def create_app():
     app.config['JWT_TOKEN_LOCATION'] = ['headers']
 
     jwt = JWTManager(app)
+    app = init_db(app)
     migrate = Migrate(app, db)
 
     return app
