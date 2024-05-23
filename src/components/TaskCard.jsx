@@ -25,7 +25,6 @@ import {Add, AddBox, Delete, TaskAlt} from "@mui/icons-material";
 import {useDispatch, useSelector} from "react-redux";
 import {removeTaskCard, updateTaskData} from "../redux-toolkit/slices/taskSlice.js";
 import {nanoid} from "@reduxjs/toolkit";
-// import {editing} from "../redux-toolkit/slices/editorSlice.js";
 
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
@@ -76,17 +75,59 @@ export default function TaskCard({task}) {
         newTask.favourite = !newTask.favourite
         dispatch(updateTaskData(newTask))
     }
-
-    const handleTitleChange = (title) => {
-        if (title!==task.title){
-            let newTask = {...task}
-            newTask.title = title
-            dispatch(updateTaskData(newTask))
+    const [cardTitle, setCardTitle] = React.useState('')
+    const [taskDescription, setTaskDescription] = React.useState([task.tasks])
+    function addTaskDescription(val) {
+        let aux = [...taskDescription]
+        if(aux.find(obj => {
+            return obj.id === val.id
+        })){
+            for (let i=0;i<taskDescription.length;i++) {
+                if (taskDescription[i].id === val.id) {
+                    aux.splice(i,1,val)
+                    break
+                }
+            }
         }
+        else {
+            aux.push(val)
+        }
+        setTaskDescription(aux)
+    }
+
+    const handleFinishEditing = () => {
+        let newTaskCard = {...task}
+        if (cardTitle!==task.title && cardTitle!==''){
+            newTaskCard.title = cardTitle
+        }
+        let aux = [...task.tasks]
+        if (taskDescription.length>0){
+            for(let i=0;i<taskDescription.length;i++){
+                for (let j=0;j<task.tasks.length;j++){
+                    if(task.tasks[j].id === taskDescription[i].id){
+                        let newTask=task.tasks.find(obj => {
+                            return obj.id === task.tasks[j].id
+                        })
+                        newTask={...newTask}
+                        newTask.description = taskDescription[i].text
+                        aux.splice(j,1, newTask)
+                    }
+                }
+            }
+        }
+
+        dispatch(updateTaskData({
+            id:task.id,
+            title:newTaskCard.title,
+            favourite:task.favourite,
+            tasks:aux
+        }))
+        setTaskDescription([])
     }
 
     const handleEdit = () => {
         setEditingTitle(true)
+        setCardTitle(task.title)
         handleClose()
     }
 
@@ -136,10 +177,7 @@ export default function TaskCard({task}) {
                     <TextField
                         size="small"
                         defaultValue={task.title}
-                        onKeyDown={(e)=>{if(e.keyCode == 13){
-                            handleTitleChange(e.target.value)
-                            setEditingTitle(false)
-                        }}}
+                        onChange={(e)=>{setCardTitle(e.target.value)}}
                     />)
             :(<b style={{fontSize:18}}>{task.title}</b>)}
                 action={<><IconButton
@@ -176,7 +214,7 @@ export default function TaskCard({task}) {
                             <ListItem
                                 key={`task${value.id}`}
                                 secondaryAction={editingTitle?
-                                    (<IconButton onMouseDown={(e)=>{
+                                    (<IconButton onMouseDown={()=>{
                                         deleteTask(value.id)}} edge="end" aria-label="delete-task">
                                         <Delete/>
                                     </IconButton>):(<></>)
@@ -195,11 +233,24 @@ export default function TaskCard({task}) {
                                             inputProps={{ 'aria-labelledby': labelId }}
                                         />
                                     </ListItemIcon>
-                                    <ListItemText sx={
+                                    {editingTitle?(
+                                            <TextField
+                                                sx={{
+                                                    width:'100%',
+                                                    maxWidth:400,
+                                                }}
+                                                inputProps={{style: {fontSize: 14}}}
+                                                size="small"
+                                                multiline={true}
+                                                fullWidth={true}
+                                                defaultValue={value.description}
+                                                onChange={(e)=>{addTaskDescription({id:value.id, text:e.target.value})}}
+                                            />):
+                                    (<ListItemText sx={
                                         {
                                             textDecoration: value.completed?
                                                 "line-through" : "none"
-                                        }} id={labelId} primary={value.description} />
+                                        }} id={labelId} primary={value.description} />)}
                                 </ListItemButton>
                             </ListItem>
                         );
@@ -234,6 +285,7 @@ export default function TaskCard({task}) {
                     }}
                     onClick={() => {
                         setEditingTitle(false)
+                        handleFinishEditing()
                     }}
                     variant={'contained'}
                 >
