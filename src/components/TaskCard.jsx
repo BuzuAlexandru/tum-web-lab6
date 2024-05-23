@@ -30,7 +30,7 @@ import {nanoid} from "@reduxjs/toolkit";
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 export default function TaskCard({task}) {
-    const [editingTitle, setEditingTitle] = React.useState(false)
+    const [editingMode, setEditingMode] = React.useState(false)
 
     const handleToggle = (value) => () => {
         let aux = [...task.tasks]
@@ -126,7 +126,7 @@ export default function TaskCard({task}) {
     }
 
     const handleEdit = () => {
-        setEditingTitle(true)
+        setEditingMode(true)
         setCardTitle(task.title)
         handleClose()
     }
@@ -173,7 +173,7 @@ export default function TaskCard({task}) {
                     paddingBottom:'5px',
                 }}
                 avatar={<TaskAlt/>}
-                title={editingTitle?(
+                title={editingMode?(
                     <TextField
                         size="small"
                         defaultValue={task.title}
@@ -200,7 +200,7 @@ export default function TaskCard({task}) {
                         onClose={handleClose}
                         TransitionComponent={Fade}
                     >
-                        <MenuItem disabled={editingTitle} onClick={handleEdit}>Edit</MenuItem>
+                        <MenuItem disabled={editingMode} onClick={handleEdit}>Edit</MenuItem>
                         <MenuItem sx={{color:'red'}} onClick={deleteCard}>Delete</MenuItem>
                     </Menu></>
             }/>
@@ -213,7 +213,7 @@ export default function TaskCard({task}) {
                         return (
                             <ListItem
                                 key={`task${value.id}`}
-                                secondaryAction={editingTitle?
+                                secondaryAction={editingMode?
                                     (<IconButton onMouseDown={()=>{
                                         deleteTask(value.id)}} edge="end" aria-label="delete-task">
                                         <Delete/>
@@ -233,7 +233,7 @@ export default function TaskCard({task}) {
                                             inputProps={{ 'aria-labelledby': labelId }}
                                         />
                                     </ListItemIcon>
-                                    {editingTitle?(
+                                    {editingMode?(
                                             <TextField
                                                 sx={{
                                                     width:'100%',
@@ -274,17 +274,17 @@ export default function TaskCard({task}) {
             }}>
                 <Checkbox
                     {...label}
+                    checked={task.favourite}
                     icon={<StarBorderIcon />}
                     checkedIcon={<StarIcon sx={{color: '#ffc107'}} />}
                     onChange={handleFavorite}
-
                 />
-                {editingTitle?(<Button
+                {editingMode?(<Button
                     sx={{
                         float: 'right'
                     }}
                     onClick={() => {
-                        setEditingTitle(false)
+                        setEditingMode(false)
                         handleFinishEditing()
                     }}
                     variant={'contained'}
