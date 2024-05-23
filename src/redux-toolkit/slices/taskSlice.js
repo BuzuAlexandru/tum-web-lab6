@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-
-const initialState = [
+const sampleData = [
     {
         id: 0,
         title: 'PW Lab 6',
@@ -18,7 +17,7 @@ const initialState = [
             },
             {
                 id: 2,
-                description: 'Store some of the state in localStorage',
+                description: 'Store state in localStorage',
                 completed: false,
             }
         ]
@@ -46,6 +45,16 @@ const initialState = [
         ]
     },
 ]
+const storageKey = 'taskData'
+const getInitialTaskData = () => {
+    const localTodoList = localStorage.getItem(storageKey);
+    if (localTodoList) {
+        return JSON.parse(localTodoList);
+    }
+    localStorage.setItem(storageKey, JSON.stringify(sampleData));
+    return [];
+};
+const initialState = getInitialTaskData()
 
 const taskSlice = createSlice({
     name: 'taskData',
@@ -53,6 +62,7 @@ const taskSlice = createSlice({
     reducers: {
         addTaskData(state, action) {
             state.push(action.payload)
+            localStorage.setItem(storageKey, JSON.stringify(state))
         },
         removeTaskCard(state, action) {
             let cardIndex = 0;
@@ -63,6 +73,7 @@ const taskSlice = createSlice({
                 }
             }
             state.splice(cardIndex,1)
+            localStorage.setItem(storageKey, JSON.stringify(state))
         },
         updateTaskData(state, action) {
             for (let i = 0; i < state.length; i++) {
@@ -71,6 +82,7 @@ const taskSlice = createSlice({
                     break
                 }
             }
+            localStorage.setItem(storageKey, JSON.stringify(state))
         }
     },
 })
