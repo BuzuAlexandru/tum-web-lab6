@@ -13,12 +13,12 @@ const sampleData = [
             {
                 id: 1,
                 description: 'Entities that can be manipulated',
-                completed: false,
+                completed: true,
             },
             {
                 id: 2,
                 description: 'Store state in localStorage',
-                completed: false,
+                completed: true,
             }
         ]
     },
@@ -47,12 +47,12 @@ const sampleData = [
 ]
 const storageKey = 'taskData'
 const getInitialTaskData = () => {
-    const localTodoList = localStorage.getItem(storageKey);
-    if (localTodoList) {
-        return JSON.parse(localTodoList);
+    const localTaskData = localStorage.getItem(storageKey);
+    if (localTaskData) {
+        return JSON.parse(localTaskData);
     }
     localStorage.setItem(storageKey, JSON.stringify(sampleData));
-    return [];
+    return sampleData;
 };
 const initialState = getInitialTaskData()
 
