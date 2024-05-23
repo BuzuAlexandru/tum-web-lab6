@@ -1,5 +1,16 @@
 import React from 'react';
-import {Card, CardHeader, CardContent, CardActions, Checkbox, Button, Menu, MenuItem, Fade} from "@mui/material";
+import {
+    Card,
+    CardHeader,
+    CardContent,
+    CardActions,
+    Checkbox,
+    Button,
+    Menu,
+    MenuItem,
+    Fade,
+    TextField
+} from "@mui/material";
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from "@mui/icons-material/Star";
 import List from '@mui/material/List';
@@ -11,37 +22,51 @@ import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CommentIcon from '@mui/icons-material/Comment';
 import {Add, AddBox, Delete, TaskAlt} from "@mui/icons-material";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {removeTaskCard, updateTaskData} from "../redux-toolkit/slices/taskSlice.js";
+import {nanoid} from "@reduxjs/toolkit";
+// import {editing} from "../redux-toolkit/slices/editorSlice.js";
 
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 export default function TaskCard({task}) {
-    const [checked, setChecked] = React.useState([]);
+    const [editingTitle, setEditingTitle] = React.useState(false)
 
     const handleToggle = (value) => () => {
-        const currentIndex = checked.indexOf(value);
-        const newChecked = [...checked];
-
-        if (currentIndex === -1) {
-            newChecked.push(value);
-        } else {
-            newChecked.splice(currentIndex, 1);
+        let aux = [...task.tasks]
+        let newTask=task.tasks.find(obj => {
+            return obj.id === value
+        })
+        newTask={...newTask}
+        newTask.completed = !newTask.completed
+        for (let i = 0; i < task.tasks.length; i++) {
+            if (aux[i].id === value) {
+                aux.splice(i,1, newTask)
+                break
+            }
         }
-
-        setChecked(newChecked);
+        dispatch(updateTaskData({
+            id:task.id,
+            title:task.title,
+            favourite:task.favourite,
+            tasks:aux
+        }))
     };
 
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const open = Boolean(anchorEl);
+    const [open, setOpen] = React.useState(false)
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
+        setOpen(true)
     };
     const handleClose = () => {
         setAnchorEl(null);
+        setOpen(false)
     };
+    // const editorState = useSelector((state) => state.editor)
     const dispatch = useDispatch()
+
     const deleteCard=()=>{
         dispatch(removeTaskCard(task.id))
     }
@@ -52,6 +77,50 @@ export default function TaskCard({task}) {
         dispatch(updateTaskData(newTask))
     }
 
+    const handleTitleChange = (title) => {
+        if (title!==task.title){
+            let newTask = {...task}
+            newTask.title = title
+            dispatch(updateTaskData(newTask))
+        }
+    }
+
+    const handleEdit = () => {
+        setEditingTitle(true)
+        handleClose()
+    }
+
+    const addNewTask= () => {
+        let aux = [...task.tasks]
+        aux.push({
+            id:Date.now() + Math.random(),
+            description:'New Task',
+            completed:false,
+        })
+        dispatch(updateTaskData({
+            id:task.id,
+            title:task.title,
+            favourite:task.favourite,
+            tasks:aux
+        }))
+    }
+
+    const deleteTask = (value) => {
+        let aux = [...task.tasks]
+        for (let i = 0; i < task.tasks.length; i++) {
+            if (aux[i].id === value) {
+                aux.splice(i,1)
+                break
+            }
+        }
+        dispatch(updateTaskData({
+            id:task.id,
+            title:task.title,
+            favourite:task.favourite,
+            tasks:aux
+        }))
+    }
+
     return (
         <div style={{paddingBottom: '20px'}}>
         <Card sx={{
@@ -60,10 +129,19 @@ export default function TaskCard({task}) {
         }}>
             <CardHeader
                 sx={{
-                    paddingBottom:'5px'
+                    paddingBottom:'5px',
                 }}
                 avatar={<TaskAlt/>}
-                title={task.title}
+                title={editingTitle?(
+                    <TextField
+                        size="small"
+                        defaultValue={task.title}
+                        onKeyDown={(e)=>{if(e.keyCode == 13){
+                            handleTitleChange(e.target.value)
+                            setEditingTitle(false)
+                        }}}
+                    />)
+            :(<b style={{fontSize:18}}>{task.title}</b>)}
                 action={<><IconButton
                             aria-label="settings"
                             id="fade-button"
@@ -84,6 +162,7 @@ export default function TaskCard({task}) {
                         onClose={handleClose}
                         TransitionComponent={Fade}
                     >
+                        <MenuItem disabled={editingTitle} onClick={handleEdit}>Edit</MenuItem>
                         <MenuItem sx={{color:'red'}} onClick={deleteCard}>Delete</MenuItem>
                     </Menu></>
             }/>
@@ -96,25 +175,31 @@ export default function TaskCard({task}) {
                         return (
                             <ListItem
                                 key={`task${value.id}`}
-                                secondaryAction={
-                                    <IconButton edge="end" aria-label="comments">
-                                        <Delete />
-                                    </IconButton>
+                                secondaryAction={editingTitle?
+                                    (<IconButton onMouseDown={(e)=>{
+                                        deleteTask(value.id)}} edge="end" aria-label="delete-task">
+                                        <Delete/>
+                                    </IconButton>):(<></>)
                                 }
                                 disablePadding
+
                             >
-                                <ListItemButton role={undefined} dense disableRipple>
+                                <ListItemButton sx={{input:{cursor: 'arrow'}}} role={undefined} dense disableRipple>
                                     <ListItemIcon sx={{minWidth:'30px'}}>
                                         <Checkbox
                                             edge="start"
-                                            checked={checked.indexOf(value.id) !== -1}
+                                            checked={value.completed}
                                             onChange={handleToggle(value.id)}
                                             tabIndex={-1}
                                             disableRipple
                                             inputProps={{ 'aria-labelledby': labelId }}
                                         />
                                     </ListItemIcon>
-                                    <ListItemText id={labelId} primary={value.description} />
+                                    <ListItemText sx={
+                                        {
+                                            textDecoration: value.completed?
+                                                "line-through" : "none"
+                                        }} id={labelId} primary={value.description} />
                                 </ListItemButton>
                             </ListItem>
                         );
@@ -124,14 +209,17 @@ export default function TaskCard({task}) {
                     sx={{
                         width:'100%'
                     }}
+                    onClick={addNewTask}
                     variant="outlined"
-                    // onClick={handleAddFruit}
                 >
                     <Add/>
                 </Button>
+
             </CardContent>
             <CardActions sx={{
-                paddingTop: '5px'
+                paddingTop: '5px',
+                display:'block',
+                paddingRight: '10px'
             }}>
                 <Checkbox
                     {...label}
@@ -140,6 +228,17 @@ export default function TaskCard({task}) {
                     onChange={handleFavorite}
 
                 />
+                {editingTitle?(<Button
+                    sx={{
+                        float: 'right'
+                    }}
+                    onClick={() => {
+                        setEditingTitle(false)
+                    }}
+                    variant={'contained'}
+                >
+                    Done
+                </Button>):(<></>)}
             </CardActions>
         </Card></div>
     );
