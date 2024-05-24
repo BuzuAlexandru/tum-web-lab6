@@ -1,14 +1,391 @@
 {
-  "openapi": "3.0.0",
-
-    "info": {
-        "title": "TASKMASTER API",
-        "version": "1.0.0"
-    },
-
-    "tags": [
-        {
-          "name": "Taskmaster API"
+  "swagger": "2.0",
+  "info": {
+    "title": "Task Management API",
+    "description": "API for managing tasks and task cards",
+    "version": "1.0.0"
+  },
+  "basePath": "/",
+  "paths": {
+    "/token": {
+      "get": {
+        "summary": "Generate JWT Token",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "query",
+            "description": "Role of the user",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token generated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
         }
-    ]
+      }
+    },
+    "/taskcards": {
+      "post": {
+        "summary": "Add Task Card",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Role",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Task Card object to add",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskCard"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Task card added",
+            "schema": {
+              "$ref": "#/definitions/TaskCardResponse"
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get Task Cards",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Role",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Items per page",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task cards retrieved",
+            "schema": {
+              "$ref": "#/definitions/TaskCardListResponse"
+            }
+          }
+        }
+      }
+    },
+    "/taskcards/{card_id}": {
+      "put": {
+        "summary": "Update Task Card",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Role",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "card_id",
+            "in": "path",
+            "description": "ID of the task card to update",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Updated Task Card object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TaskCard"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task card updated",
+            "schema": {
+              "$ref": "#/definitions/TaskCardResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Task Card",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Role",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "card_id",
+            "in": "path",
+            "description": "ID of the task card to delete",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task card deleted"
+          }
+        }
+      }
+    },
+    "/taskcards/{card_id}/tasks": {
+      "post": {
+        "summary": "Add Task",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Role",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "card_id",
+            "in": "path",
+            "description": "ID of the task card to add the task to",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Task object to add",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Task added",
+            "schema": {
+              "$ref": "#/definitions/TaskResponse"
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task_id}": {
+      "put": {
+        "summary": "Update Task",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Role",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "description": "ID of the task to update",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Updated Task object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Task"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task updated",
+            "schema": {
+              "$ref": "#/definitions/TaskResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Task",
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Role",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "task_id",
+            "in": "path",
+            "description": "ID of the task to delete",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task deleted"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "TaskCard": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "favourite": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Task": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "completed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "TaskCardResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "title": {
+          "type": "string"
+        },
+        "favourite": {
+          "type": "boolean"
+        }
+      }
+    },
+    "TaskResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "card_id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "description": {
+          "type": "string"
+        },
+        "completed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "TaskCardListResponse": {
+      "type": "object",
+      "properties": {
+        "taskcards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TaskCardResponse"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pages": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "current_page": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  }
 }
